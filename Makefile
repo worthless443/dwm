@@ -3,19 +3,24 @@
 
 include config.mk
 
-SRC = drw.c util.c
+SRC = drw.o util.o
 OBJ = ${SRC:.c=.o}
-TARGET=dwm
+TARGET=dwn
 CXX=clang
-LIB=libdwm.a
+LIB=libdwn.a
 
-all: $(TARGET)#$(OBJ)#$(SRC) 
+all: final #$(OBJ)#$(SRC) 
 
-.PHONY: $(SRC)
-$(SRC):
-	$(CXX) -c $@ -o $(@:.c=.o) $(INCS)
-$(TARGET): $(LIB)
-	$(CXX) $@.c -o $@  $(INCS) $(LDFLAGS) $(OBJ)
+.PHONY: clean 
+$(SRC): 
+	$(CXX) -c $(@:.o=.c) -o $(@) $(INCS)
+src:$(SRC)
+$(LIB): $(SRC)
+	ar rcs $@ $^
+
+$(TARGET):  % : lib%.a
+	$(CXX) $@.c -o $@  $(INCS) $(LDFLAGS) $^
+target:$(TARGET)
 
 options:
 	@echo dwm build options:
@@ -23,11 +28,8 @@ options:
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
 clean: 
-	rm -rf $(OBJ)
-$(LIB):$(SRC)
-	ar rcs $@ $^
-final: $(LIB)
-	rm -rf $(OBJ) 
+	rm -rf $(OBJ) $(TARGET)
+final: $(LIB) $(TARGET)
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/dwm\
 		${DESTDIR}${PREFIX}/share/dwm/larbs.mom\
